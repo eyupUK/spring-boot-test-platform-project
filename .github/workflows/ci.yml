@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [ wip ]
+    branches: [ main, wip ]
   pull_request:
 
 jobs:
@@ -14,10 +14,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: 'maven'
       - name: Build
         run: mvn -q -DskipTests clean package
-      - name: Unit + Integration tests
-        run: mvn -q test
+      - name: Unit + Integration tests with Coverage
+        run: mvn -q verify
       - name: Pact (consumer)
         run: mvn -q -pl orchestrator-service -Ppact test
       - name: Pact (provider verify)
@@ -27,3 +28,10 @@ jobs:
         with:
           name: pacts
           path: orchestrator-service/target/pacts
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            **/target/site/jacoco/
+            **/target/site/jacoco-aggregate/
