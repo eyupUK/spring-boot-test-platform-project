@@ -1,25 +1,97 @@
 package com.example.orch.stubs;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import com.example.orch.config.TestConfig;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
-public class WireMockSampleTest {
+@SpringBootTest
+@ContextConfiguration(classes = TestConfig.class)
+class WireMockSampleTest {
 
-  static WireMockServer wm = new WireMockServer(0);
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort())
+            .build();
 
-  @BeforeAll static void before() {
-    wm.start();
-    configureFor("localhost", wm.port());
-    stubFor(get(urlEqualTo("/health")).willReturn(aResponse().withStatus(200).withBody("OK")));
-  }
+    @Autowired
+    private WebClient webClient;
 
-  @AfterAll static void after(){ wm.stop(); }
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("data.broker.base-url", () -> wireMock.baseUrl());
+    }
 
-  @Test void stubWorks() {
-    // placeholder: call wm.baseUrl() + "/health" with any HTTP client as needed
-  }
+    @Test
+    void shouldHandleSuccessfulResponse() {
+        // given
+        wireMock.stubFor(post(urlEqualTo("/api/personas/test-persona/reservations"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"id\":1,\"personaId\":\"test-persona\",\"reservedBy\":\"test-user\"}")
+                        .withStatus(201)));
+
+        // when
+        Mono<String> response = webClient.post()
+                .uri(wireMock.baseUrl() + "/api/personas/test-persona/reservations")
+                .bodyValue("{\"reservedBy\":\"test-user\"}")
+                .retrieve()
+                .bodyToMono(String.class);
+
+        // then
+        StepVerifier.create(response)
+                .expectNextMatches(body -> body.contains("test-persona"))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldHandleErrorResponse() {
+        // given
+        wireMock.stubFor(post(urlEqualTo("/api/personas/test-persona/reservations"))
+                .willReturn(aResponse()
+                        .withStatus(409)
+                        .withBody("{\"error\":\"Persona already reserved\"}")));
+
+        // when
+        Mono<String> response = webClient.post()
+                .uri(wireMock.baseUrl() + "/api/personas/test-persona/reservations")
+                .bodyValue("{\"reservedBy\":\"test-user\"}")
+                .retrieve()
+                .bodyToMono(String.class);
+
+        // then
+        StepVerifier.create(response)
+                .expectError()
+                .verify();
+    }
+
+    @Test
+    void shouldHandleNetworkError() {
+        // given
+        wireMock.stubFor(post(urlEqualTo("/api/personas/test-persona/reservations"))
+                .willReturn(aResponse().withFixedDelay(5000))); // 5 second delay
+
+        // when
+        Mono<String> response = webClient.post()
+                .uri(wireMock.baseUrl() + "/api/personas/test-persona/reservations")
+                .bodyValue("{\"reservedBy\":\"test-user\"}")
+                .retrieve()
+                .bodyToMono(String.class);
+
+        // then
+        StepVerifier.create(response)
+                .expectError()
+                .verify();
+    }
 }
