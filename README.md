@@ -1,84 +1,152 @@
-# Test Platform Project
-A **Test Enablement** Project with Java/Spring Boot.
+# Wise Test Platform Starter
 
-## What's inside
-- **orchestrator-service** (Spring Boot): accepts a test run request, plans a tiny DAG, calls the **data-broker** for personas, and publishes a Kafka event.
-- **data-broker-service** (Spring Boot): exposes `/personas/reserve` to return synthetic, compliant personas; stores reservations in Postgres.
-- **Contracts via Pact**: orchestrator is the consumer; data-broker verifies the contract.
-- **Integration tests with Testcontainers**: Postgres and Redpanda (Kafka).
-- **Resilience & fault tests**: Resilience4j timeouts/retries; `toxiproxy` to inject DB latency in a dedicated test.
-- **WireMock**: example of HTTP dependency stubbing.
-- **Perf smoke**: `k6` script to run a 60s baseline smoke on `data-broker`.
-- **CI template**: GitHub Actions workflow showing contract-test then provider verification.
+A modern microservices test platform demonstrating various testing approaches and best practices for Spring Boot applications.
 
-> Goal: get comfortable with Test Environment Mgmt, Test Data, Contract-First, and CI-first practices.
+## Overview
 
-## Quick start
-Requirements:
-- JDK 21
-- Maven 3.9+
-- Docker + Docker Compose v2
-- Node 18+ (only if you want to run k6 via `xk6`, otherwise use the official `grafana/k6` docker image)
+This project consists of two microservices:
+- **Data Broker Service**: Manages test data and personas
+- **Orchestrator Service**: Orchestrates test execution and manages test runs
 
-### 1) Spin infra (Postgres, Kafka, Toxiproxy)
+The platform demonstrates:
+- Contract Testing with Pact
+- Integration Testing with TestContainers
+- Fault Injection Testing with ToxiProxy
+- Performance Testing with k6
+- Monitoring with Prometheus & Grafana
+
+## Prerequisites
+
+- Java 21
+- Docker
+- Maven
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/wise-test-platform-starter.git
+cd wise-test-platform-starter
+```
+
+2. Start the infrastructure services:
 ```bash
 docker compose up -d
 ```
 
-### 2) Run tests + build all modules
+3. Build and run the services:
 ```bash
-./mvnw -v  # if wrapper available; otherwise use: mvn -v
-mvn -q -DskipTests clean package
-mvn test
+./mvnw clean install
+./mvnw spring-boot:run -pl data-broker-service
+./mvnw spring-boot:run -pl orchestrator-service
 ```
 
-### 3) Run the services (two terminals)
+## Service URLs
+
+- Data Broker Service: http://localhost:8081
+  - Swagger UI: http://localhost:8081/swagger-ui.html
+  - API Docs: http://localhost:8081/v3/api-docs
+  - Actuator: http://localhost:8081/actuator
+
+- Orchestrator Service: http://localhost:8080
+  - Swagger UI: http://localhost:8080/swagger-ui.html
+  - API Docs: http://localhost:8080/v3/api-docs
+  - Actuator: http://localhost:8080/actuator
+
+- Monitoring
+  - Prometheus: http://localhost:9090
+  - Grafana: http://localhost:3000 (admin/admin)
+
+## Features
+
+### Security
+- Basic authentication for API endpoints
+- Secured actuator endpoints
+- Environment variable configuration for credentials
+
+### Monitoring & Observability
+- Spring Boot Actuator integration
+- Prometheus metrics collection
+- Grafana dashboards for:
+  - JVM metrics (memory, GC, threads)
+  - Service metrics (request rate, latency, success rate)
+  - Infrastructure metrics
+
+### Testing
+- Contract Testing (Pact)
+  - Consumer-driven contract tests
+  - Provider verification
+- Integration Testing
+  - TestContainers for PostgreSQL
+  - WireMock for service virtualization
+- Fault Injection
+  - ToxiProxy for network fault simulation
+- Performance Testing
+  - k6 for load and performance testing
+
+### CI/CD
+- GitHub Actions workflow
+- Maven dependency caching
+- JaCoCo code coverage reporting
+- Containerized builds
+
+## Running Tests
+
+### Unit & Integration Tests
 ```bash
-# terminal 1
-mvn -pl data-broker-service spring-boot:run
-# terminal 2
-mvn -pl orchestrator-service spring-boot:run
+./mvnw verify
 ```
 
-### 4) Try the flow
+### Contract Tests
+Consumer tests:
 ```bash
-# Reserve a persona (data-broker)
-curl -s http://localhost:8081/personas/reserve | jq
-
-# Trigger a test run (orchestrator)
-curl -s -X POST http://localhost:8080/run -H "Content-Type: application/json" -d '{"suite":"checkout","shards":2}'
+./mvnw -pl orchestrator-service -Ppact test
 ```
 
-### 5) Pact contracts
-- Generate/verify consumer pact (from orchestrator):
+Provider verification:
 ```bash
-mvn -pl orchestrator-service -Ppact test
-```
-- Verify on provider (data-broker):
-```bash
-mvn -pl data-broker-service -Ppact verify
+./mvnw -pl data-broker-service -Ppact verify
 ```
 
-### 6) Perf smoke on data-broker
+### Performance Tests
 ```bash
-docker run --rm -i --network host grafana/k6 run - < perf/k6/smoke.js
+k6 run perf/k6/smoke.js
 ```
 
-### 7) Simulate DB latency faults (toxiproxy) and run a fault-injection test
+## Docker Support
+
+Build the services:
 ```bash
-# add 1s latency to Postgres
-docker exec toxiproxy-cli sh -c "toxiproxy-cli toxic add --upstream --type latency --toxicName pglatency --latency 1000 db"
-mvn -pl data-broker-service -Pfaults test
-# remove latency
-docker exec toxiproxy-cli sh -c "toxiproxy-cli toxic rm pglatency db || true"
+docker build -t wise/data-broker-service:latest data-broker-service
+docker build -t wise/orchestrator-service:latest orchestrator-service
 ```
 
-## Modules
-- `data-broker-service` — Port 8081
-- `orchestrator-service` — Port 8080
+## Configuration
 
-## CI (GitHub Actions)
-The provided workflow runs unit tests, Pact consumer, then provider verification, and uploads artifacts.
+### Environment Variables
 
----
-**NOTE**: This is a sample project. Security and production hardening are intentionally simplified.
+Data Broker Service:
+- `DB_HOST`: Database host (default: localhost)
+- `DB_PORT`: Database port (default: 5432)
+- `DB_NAME`: Database name (default: brokerdb)
+- `DB_USER`: Database username (default: broker)
+- `DB_PASSWORD`: Database password (default: broker)
+- `ADMIN_USER`: Admin username (default: admin)
+- `ADMIN_PASSWORD`: Admin password (default: admin)
+
+Orchestrator Service:
+- `DATA_BROKER_URL`: Data Broker Service URL (default: http://localhost:8081)
+- `KAFKA_SERVERS`: Kafka bootstrap servers (default: localhost:9092)
+- `ADMIN_USER`: Admin username (default: admin)
+- `ADMIN_PASSWORD`: Admin password (default: admin)
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Run tests and ensure CI passes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
