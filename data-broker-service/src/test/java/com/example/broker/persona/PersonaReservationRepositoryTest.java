@@ -1,5 +1,6 @@
 package com.example.broker.persona;
 
+import com.example.broker.config.BaseTestConfiguration;
 import com.example.broker.config.TestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Import(TestConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
 @Transactional
-class PersonaReservationRepositoryTest {
+class PersonaReservationRepositoryTest extends BaseTestConfiguration {
 
     @Autowired
     private PersonaReservationRepository repository;

@@ -1,5 +1,6 @@
 package com.example.broker.persona;
 
+import com.example.broker.config.BaseTestConfiguration;
 import com.example.broker.config.SecurityTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PersonaController.class)
 @Import(SecurityTestConfig.class)
-class PersonaControllerTest {
+class PersonaControllerTest extends BaseTestConfiguration {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,6 +32,22 @@ class PersonaControllerTest {
 
     @MockBean
     private PersonaReservationRepository repository;
+
+    @Test
+    void shouldRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/api/personas/reservations")
+                        .param("runId", "test-run-1"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/personas/test-persona-1/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(delete("/api/personas/reservations")
+                        .param("runId", "test-run-1"))
+                .andExpect(status().isUnauthorized());
+    }
 
     @Test
     @WithMockUser
@@ -106,11 +123,5 @@ class PersonaControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(repository).deleteByRunId(runId);
-    }
-
-    @Test
-    void shouldRequireAuthenticationForEndpoints() throws Exception {
-        mockMvc.perform(get("/api/personas/reservations"))
-                .andExpect(status().isUnauthorized());
     }
 }
