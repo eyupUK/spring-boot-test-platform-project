@@ -128,6 +128,9 @@
           <excludes>
             <exclude>**/*IT.java</exclude>
           </excludes>
+          <systemPropertyVariables>
+            <spring.profiles.active>test</spring.profiles.active>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -137,6 +140,9 @@
           <includes>
             <include>**/*IT.java</include>
           </includes>
+          <systemPropertyVariables>
+            <spring.profiles.active>test</spring.profiles.active>
+          </systemPropertyVariables>
         </configuration>
         <executions>
           <execution>

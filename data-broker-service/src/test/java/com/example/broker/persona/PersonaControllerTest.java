@@ -1,6 +1,5 @@
 package com.example.broker.persona;
 
-import com.example.broker.config.BaseTestConfiguration;
 import com.example.broker.config.SecurityTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PersonaController.class)
 @Import(SecurityTestConfig.class)
-class PersonaControllerTest extends BaseTestConfiguration {
+@ActiveProfiles("test")
+class PersonaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,11 +54,12 @@ class PersonaControllerTest extends BaseTestConfiguration {
     @WithMockUser
     void shouldCreatePersonaReservation() throws Exception {
         // given
-        PersonaReservation reservation = new PersonaReservation();
-        reservation.setId(1L);
-        reservation.setPersonaId("test-persona-1");
-        reservation.setReservedBy("test-user");
-        reservation.setRunId("test-run-1");
+        PersonaReservation reservation = PersonaReservation.builder()
+                .id(1L)
+                .personaId("test-persona-1")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
 
         when(repository.findByPersonaId("test-persona-1")).thenReturn(Optional.empty());
         when(repository.save(any(PersonaReservation.class))).thenReturn(reservation);
@@ -77,12 +79,14 @@ class PersonaControllerTest extends BaseTestConfiguration {
     @WithMockUser
     void shouldReturnConflictWhenPersonaAlreadyReserved() throws Exception {
         // given
-        PersonaReservation existingReservation = new PersonaReservation();
-        existingReservation.setPersonaId("test-persona-1");
+        PersonaReservation existingReservation = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .build();
         when(repository.findByPersonaId("test-persona-1")).thenReturn(Optional.of(existingReservation));
 
-        PersonaReservation newReservation = new PersonaReservation();
-        newReservation.setPersonaId("test-persona-1");
+        PersonaReservation newReservation = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .build();
 
         // when/then
         mockMvc.perform(post("/api/personas/test-persona-1/reservations")
@@ -95,10 +99,11 @@ class PersonaControllerTest extends BaseTestConfiguration {
     @WithMockUser
     void shouldGetReservationsByRunId() throws Exception {
         // given
-        PersonaReservation reservation = new PersonaReservation();
-        reservation.setId(1L);
-        reservation.setPersonaId("test-persona-1");
-        reservation.setRunId("test-run-1");
+        PersonaReservation reservation = PersonaReservation.builder()
+                .id(1L)
+                .personaId("test-persona-1")
+                .runId("test-run-1")
+                .build();
 
         when(repository.findByRunId("test-run-1")).thenReturn(List.of(reservation));
 
