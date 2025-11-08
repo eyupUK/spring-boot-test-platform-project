@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @TestConfiguration
@@ -27,7 +28,7 @@ public class SecurityTestConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic();
+            .httpBasic(withDefaults());
 
         return http.build();
     }
@@ -39,6 +40,7 @@ public class SecurityTestConfig {
                 .password(passwordEncoder().encode("testpass"))
                 .roles("USER")
                 .build();
+
         return new InMemoryUserDetailsManager(user);
     }
 
