@@ -1,4 +1,4 @@
-# Wise Test Platform Starter
+# Test Platform Starter
 
 A modern microservices test platform demonstrating various testing approaches and best practices for Spring Boot applications.
 
