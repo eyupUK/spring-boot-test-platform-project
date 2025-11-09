@@ -1,4 +1,4 @@
-# Wise Test Platform Starter
+# Test Platform Starter
 
 A modern microservices test platform demonstrating various testing approaches and best practices for Spring Boot applications.
 
@@ -26,7 +26,7 @@ The platform demonstrates:
 1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/wise-test-platform-starter.git
-cd wise-test-platform-starter
+cd test-platform-starter
 ```
 
 2. Start the infrastructure services:
