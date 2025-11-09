@@ -1,15 +1,13 @@
 package com.example.orch.config;
 
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@TestConfiguration
-public class TestConfig {
+@Configuration
+public class WebClientConfig {
 
     @Bean
-    @Primary
     public WebClient webClient() {
         return WebClient.builder().build();
     }

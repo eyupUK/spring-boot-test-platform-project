@@ -32,7 +32,7 @@ class RunControllerTest {
     @WithMockUser
     void shouldCreateRun() {
         // given
-        Map<String, String> run = Map.of(
+        Map<String, Object> run = Map.of(
                 "id", "test-run-1",
                 "name", "Test Run",
                 "description", "Test Description"
@@ -60,7 +60,7 @@ class RunControllerTest {
     @WithMockUser
     void shouldGetRun() {
         // given
-        Map<String, String> run = Map.of(
+        Map<String, Object> run = Map.of(
                 "id", "test-run-1",
                 "name", "Test Run",
                 "description", "Test Description"
