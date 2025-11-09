@@ -93,7 +93,7 @@ class RunServiceIntegrationTest {
     void shouldHandleNetworkFailure() {
         // given
         wireMock.stubFor(post(urlEqualTo("/api/personas/test-persona/reservations"))
-                .willReturn(aResponse().withFixedDelay(3000))); // 3 second delay
+                .willReturn(aResponse().withFixedDelay(5000))); // 5 second delay
 
         Map<String, String> runRequest = Map.of(
                 "name", "Test Run",
@@ -104,7 +104,7 @@ class RunServiceIntegrationTest {
         // when/then
         StepVerifier.create(runService.createRun(runRequest))
                 .expectError()
-                .verify();
+                .verify(java.time.Duration.ofSeconds(10));
     }
 
     @Test

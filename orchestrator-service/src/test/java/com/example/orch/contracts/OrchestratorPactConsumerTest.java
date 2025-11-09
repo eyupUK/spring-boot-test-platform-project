@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import com.example.orch.config.TestConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,19 @@ import java.util.Map;
 
 @SpringBootTest
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "data-broker-service")
+@PactTestFor(providerName = "data-broker-service", port = "8081")
 @ContextConfiguration(classes = TestConfig.class)
 @ActiveProfiles("test")
 class OrchestratorPactConsumerTest {
 
-    @Autowired
     private WebClient webClient;
+
+    @BeforeEach
+    void setup() {
+        webClient = WebClient.builder()
+                .baseUrl("http://localhost:8081")
+                .build();
+    }
 
     @DynamicPropertySource
     static void configurePactProperties(DynamicPropertyRegistry registry) {

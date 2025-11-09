@@ -58,6 +58,7 @@ public class RunService {
         .onStatus(status -> status.value() == 409,
             response -> Mono.error(new RuntimeException("Persona already reserved")))
         .bodyToMono(Map.class)
+        .timeout(java.time.Duration.ofSeconds(3))
         .map(reservation -> {
           Map<String, Object> run = new HashMap<>(request);
           run.put("id", runId);

@@ -41,7 +41,9 @@ class RunControllerTest {
         when(runService.createRun(any())).thenReturn(Mono.just(run));
 
         // when/then
-        webTestClient.post()
+        webTestClient
+                .mutateWith(org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/api/runs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(Map.of(

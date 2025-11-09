@@ -87,11 +87,12 @@ class WireMockSampleTest {
                 .uri(wireMock.baseUrl() + "/api/personas/test-persona/reservations")
                 .bodyValue("{\"reservedBy\":\"test-user\"}")
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(String.class)
+                .timeout(java.time.Duration.ofSeconds(2));
 
         // then
         StepVerifier.create(response)
                 .expectError()
-                .verify();
+                .verify(java.time.Duration.ofSeconds(10));
     }
 }
