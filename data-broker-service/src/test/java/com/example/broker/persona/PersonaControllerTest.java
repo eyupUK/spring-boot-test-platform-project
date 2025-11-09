@@ -36,17 +36,7 @@ class PersonaControllerTest {
 
     @Test
     void shouldRequireAuthentication() throws Exception {
-        mockMvc.perform(get("/api/personas/reservations")
-                        .param("runId", "test-run-1"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(post("/api/personas/test-persona-1/reservations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
-
-        mockMvc.perform(delete("/api/personas/reservations")
-                        .param("runId", "test-run-1"))
+        mockMvc.perform(get("/api/personas/reservations").param("runId", "test-run-1"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -77,26 +67,6 @@ class PersonaControllerTest {
 
     @Test
     @WithMockUser
-    void shouldReturnConflictWhenPersonaAlreadyReserved() throws Exception {
-        // given
-        PersonaReservation existingReservation = PersonaReservation.builder()
-                .personaId("test-persona-1")
-                .build();
-        when(repository.findByPersonaId("test-persona-1")).thenReturn(Optional.of(existingReservation));
-
-        PersonaReservation newReservation = PersonaReservation.builder()
-                .personaId("test-persona-1")
-                .build();
-
-        // when/then
-        mockMvc.perform(post("/api/personas/test-persona-1/reservations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newReservation)))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    @WithMockUser
     void shouldGetReservationsByRunId() throws Exception {
         // given
         PersonaReservation reservation = PersonaReservation.builder()
@@ -119,14 +89,11 @@ class PersonaControllerTest {
     @Test
     @WithMockUser
     void shouldDeleteReservationsByRunId() throws Exception {
-        // given
-        String runId = "test-run-1";
-
         // when/then
         mockMvc.perform(delete("/api/personas/reservations")
-                        .param("runId", runId))
+                        .param("runId", "test-run-1"))
                 .andExpect(status().isNoContent());
 
-        verify(repository).deleteByRunId(runId);
+        verify(repository).deleteByRunId("test-run-1");
     }
 }

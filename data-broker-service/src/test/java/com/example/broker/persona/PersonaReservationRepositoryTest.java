@@ -1,14 +1,9 @@
 package com.example.broker.persona;
 
-import com.example.broker.config.BaseTestConfiguration;
-import com.example.broker.config.TestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,27 +11,26 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(TestConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Transactional
-class PersonaReservationRepositoryTest extends BaseTestConfiguration {
+@ActiveProfiles("test")
+class PersonaReservationRepositoryTest {
 
     @Autowired
     private PersonaReservationRepository repository;
 
     @Test
-    void shouldSaveAndRetrievePersonaReservation() {
+    void shouldSaveAndFindByPersonaId() {
         // given
-        PersonaReservation reservation = new PersonaReservation();
-        reservation.setPersonaId("test-persona-1");
-        reservation.setReservedBy("test-user");
-        reservation.setRunId("test-run-1");
+        PersonaReservation reservation = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
 
         // when
-        PersonaReservation saved = repository.save(reservation);
+        repository.save(reservation);
+        Optional<PersonaReservation> found = repository.findByPersonaId("test-persona-1");
 
         // then
-        Optional<PersonaReservation> found = repository.findById(saved.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getPersonaId()).isEqualTo("test-persona-1");
         assertThat(found.get().getReservedBy()).isEqualTo("test-user");
@@ -44,17 +38,19 @@ class PersonaReservationRepositoryTest extends BaseTestConfiguration {
     }
 
     @Test
-    void shouldFindByRunId() {
+    void shouldFindMultipleByRunId() {
         // given
-        PersonaReservation reservation1 = new PersonaReservation();
-        reservation1.setPersonaId("test-persona-1");
-        reservation1.setReservedBy("test-user");
-        reservation1.setRunId("test-run-1");
+        PersonaReservation reservation1 = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
 
-        PersonaReservation reservation2 = new PersonaReservation();
-        reservation2.setPersonaId("test-persona-2");
-        reservation2.setReservedBy("test-user");
-        reservation2.setRunId("test-run-1");
+        PersonaReservation reservation2 = PersonaReservation.builder()
+                .personaId("test-persona-2")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
 
         repository.saveAll(List.of(reservation1, reservation2));
 
@@ -70,10 +66,12 @@ class PersonaReservationRepositoryTest extends BaseTestConfiguration {
     @Test
     void shouldFindByPersonaId() {
         // given
-        PersonaReservation reservation = new PersonaReservation();
-        reservation.setPersonaId("test-persona-1");
-        reservation.setReservedBy("test-user");
-        reservation.setRunId("test-run-1");
+        PersonaReservation reservation = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
+
         repository.save(reservation);
 
         // when
@@ -87,10 +85,12 @@ class PersonaReservationRepositoryTest extends BaseTestConfiguration {
     @Test
     void shouldDeleteByRunId() {
         // given
-        PersonaReservation reservation = new PersonaReservation();
-        reservation.setPersonaId("test-persona-1");
-        reservation.setReservedBy("test-user");
-        reservation.setRunId("test-run-1");
+        PersonaReservation reservation = PersonaReservation.builder()
+                .personaId("test-persona-1")
+                .reservedBy("test-user")
+                .runId("test-run-1")
+                .build();
+
         repository.save(reservation);
 
         // when

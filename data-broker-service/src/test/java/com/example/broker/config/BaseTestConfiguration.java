@@ -1,13 +1,12 @@
 package com.example.broker.config;
 
-import com.example.broker.ContainersConfig;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import({ContainersConfig.class, SecurityTestConfig.class})
+@Import(SecurityTestConfig.class)
 public abstract class BaseTestConfiguration {
-    // This class serves as a base for all tests, importing common configurations
+    // Base configuration class for all tests
 }
