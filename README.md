@@ -97,6 +97,10 @@ docker compose up -d
 ./mvnw verify
 ```
 
+Code coverage reports (JaCoCo) are generated automatically during `mvn verify` and can be found at:
+- Individual module reports: `{module}/target/site/jacoco/index.html`
+- Aggregated report: `target/site/jacoco-aggregate/index.html`
+
 ### Contract Tests
 Consumer tests:
 ```bash

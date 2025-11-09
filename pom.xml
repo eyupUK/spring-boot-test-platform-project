@@ -10,12 +10,12 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.example.wise</groupId>
-    <artifactId>wise-test-platform-starter</artifactId>
+    <groupId>com.example.org</groupId>
+    <artifactId>test-platform-starter</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>wise-test-platform-starter</name>
-    <description>Wise Test Platform Starter</description>
+    <name>test-platform-starter</name>
+    <description>Test Platform Starter</description>
 
     <modules>
         <module>data-broker-service</module>
@@ -30,6 +30,7 @@
         <lombok.version>1.18.30</lombok.version>
         <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.2.1</maven-failsafe-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -62,6 +63,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven-failsafe-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -97,6 +103,32 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
                 </executions>
