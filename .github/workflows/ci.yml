@@ -38,5 +38,7 @@ jobs:
       - name: Upload Unit + Integration tests
         uses: actions/upload-artifact@v4
         with:
-          name: Unit + Integration tests
-          path: **/target/
+          name: test-reports
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
