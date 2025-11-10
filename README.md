@@ -146,10 +146,9 @@ Orchestrator Service:
 
 ## Contributing
 
-1. Create a feature branch
+1. Clone/fork the repo
 2. Make your changes
-3. Run tests and ensure CI passes
-4. Submit a pull request
+3. Run tests locally and ensure CI passes
 
 ## License
 

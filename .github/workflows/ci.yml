@@ -35,3 +35,8 @@ jobs:
           path: |
             **/target/site/jacoco/
             **/target/site/jacoco-aggregate/
+      - name: Upload Unit + Integration tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit + Integration tests
+          path: **/target/
